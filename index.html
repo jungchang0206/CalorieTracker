@@ -874,8 +874,6 @@
   <script>
     class CalorieTracker {
       constructor() {
-        this.API_KEY = 'gL6c07ZShIWbosfCXN8eFJAkfvLL1RcqIs2smB0H';
-        this.BASE_URL = 'https://api.nal.usda.gov/fdc/v1';
         this.selectedFood = null;
         this.dailyEntries = [];
         this.dailyGoal = 2000;
@@ -964,7 +962,11 @@
 
         this.elements.clearLogBtn.addEventListener('click', () => {
           if (confirm('Are you sure you want to clear all logged foods?')) {
-            this.dailyEntries = [];
+            if (this.logsByDate[this.selectedDate]) {
+              this.logsByDate[this.selectedDate] = [];
+              this.saveToStorage();
+            }
+            this.loadLogForDate(this.selectedDate);
             this.updateFoodLog();
             this.updateProgress();
           }
@@ -998,9 +1000,9 @@
         this.elements.searchResults.innerHTML = '';
 
         try {
-          // Call the USDA API directly with your API key
+          // Only use backend endpoint
           const response = await fetch(
-            `http://localhost:3001/api/foods/search?query=${encodeURIComponent(query)}&pageSize=20`
+            'http://localhost:3001/api/foods/search?query=' + encodeURIComponent(query) + '&pageSize=20'
           );
 
           if (!response.ok) {
